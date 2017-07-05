@@ -8,7 +8,7 @@
 #include <nginx.h>
 
 
-#line 46 "ngx_http_ssdb_response.rl"
+#line 43 "ngx_http_ssdb_response.rl"
 
 
 
@@ -20,7 +20,7 @@ static const int ssdb_response_error = 0;
 static const int ssdb_response_en_main = 1;
 
 
-#line 49 "ngx_http_ssdb_response.rl"
+#line 46 "ngx_http_ssdb_response.rl"
 
 ngx_int_t
 ngx_http_ssdb_process_reply(ngx_http_ssdb_ctx_t *ctx, ssize_t bytes)
@@ -48,7 +48,7 @@ ngx_http_ssdb_process_reply(ngx_http_ssdb_ctx_t *ctx, ssize_t bytes)
 	cs = ssdb_response_start;
 	}
 
-#line 71 "ngx_http_ssdb_response.rl"
+#line 68 "ngx_http_ssdb_response.rl"
 		ctx->state = cs;
 	} else {
 		cs = ctx->state;
@@ -79,15 +79,16 @@ tr0:
 #line 23 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length = 0;
+        ctx->chunk_read = 0;
     }
-#line 31 "ngx_http_ssdb_response.rl"
+#line 28 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length *= 10;
         ctx->chunk_length += *p - '0';
     }
 	goto st2;
 tr4:
-#line 31 "ngx_http_ssdb_response.rl"
+#line 28 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length *= 10;
         ctx->chunk_length += *p - '0';
@@ -97,7 +98,7 @@ st2:
 	if ( ++p == pe )
 		goto _test_eof2;
 case 2:
-#line 101 "ngx_http_ssdb_response.c"
+#line 102 "ngx_http_ssdb_response.c"
 	switch( (*p) ) {
 		case 10: goto st3;
 		case 13: goto st12;
@@ -117,19 +118,12 @@ case 3:
         ctx->chunk_read++ < ctx->chunk_length
      ) _widec += 256;
 	if ( 384 <= _widec && _widec <= 639 )
-		goto tr5;
+		goto st4;
 	goto st0;
-tr5:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
-	goto st4;
 st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 133 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -140,10 +134,10 @@ case 4:
 	switch( _widec ) {
 		case 266: goto st5;
 		case 269: goto st6;
-		case 522: goto tr8;
+		case 522: goto st7;
 	}
 	if ( 384 <= _widec && _widec <= 639 )
-		goto tr5;
+		goto st4;
 	goto st0;
 st5:
 	if ( ++p == pe )
@@ -164,7 +158,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 168 "ngx_http_ssdb_response.c"
+#line 162 "ngx_http_ssdb_response.c"
 	goto st0;
 st6:
 	if ( ++p == pe )
@@ -173,17 +167,10 @@ case 6:
 	if ( (*p) == 10 )
 		goto st5;
 	goto st0;
-tr8:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
-	goto st7;
 st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 187 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -202,11 +189,11 @@ case 7:
 	} else if ( _widec > 560 ) {
 		if ( _widec > 569 ) {
 			if ( 570 <= _widec && _widec <= 639 )
-				goto tr5;
+				goto st4;
 		} else if ( _widec >= 561 )
 			goto tr12;
 	} else
-		goto tr5;
+		goto st4;
 	goto st0;
 tr10:
 #line 19 "ngx_http_ssdb_response.rl"
@@ -218,17 +205,13 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 222 "ngx_http_ssdb_response.c"
+#line 209 "ngx_http_ssdb_response.c"
 	if ( (*p) == 10 )
 		goto tr9;
 	if ( 49 <= (*p) && (*p) <= 57 )
 		goto tr0;
 	goto st0;
 tr11:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
 #line 19 "ngx_http_ssdb_response.rl"
 	{
         done = 1;
@@ -238,7 +221,7 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 242 "ngx_http_ssdb_response.c"
+#line 225 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -257,43 +240,36 @@ case 15:
 	} else if ( _widec > 560 ) {
 		if ( _widec > 569 ) {
 			if ( 570 <= _widec && _widec <= 639 )
-				goto tr5;
+				goto st4;
 		} else if ( _widec >= 561 )
 			goto tr12;
 	} else
-		goto tr5;
+		goto st4;
 	goto st0;
 tr12:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
 #line 23 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length = 0;
+        ctx->chunk_read = 0;
     }
-#line 31 "ngx_http_ssdb_response.rl"
+#line 28 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length *= 10;
         ctx->chunk_length += *p - '0';
     }
 	goto st8;
 tr16:
-#line 31 "ngx_http_ssdb_response.rl"
+#line 28 "ngx_http_ssdb_response.rl"
 	{
         ctx->chunk_length *= 10;
         ctx->chunk_length += *p - '0';
-    }
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
     }
 	goto st8;
 st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 297 "ngx_http_ssdb_response.c"
+#line 273 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -304,8 +280,8 @@ case 8:
 	switch( _widec ) {
 		case 266: goto st9;
 		case 269: goto st10;
-		case 522: goto tr8;
-		case 525: goto tr15;
+		case 522: goto st7;
+		case 525: goto st11;
 	}
 	if ( _widec < 384 ) {
 		if ( 304 <= _widec && _widec <= 313 )
@@ -313,11 +289,11 @@ case 8:
 	} else if ( _widec > 559 ) {
 		if ( _widec > 569 ) {
 			if ( 570 <= _widec && _widec <= 639 )
-				goto tr5;
+				goto st4;
 		} else if ( _widec >= 560 )
 			goto tr16;
 	} else
-		goto tr5;
+		goto st4;
 	goto st0;
 st9:
 	if ( ++p == pe )
@@ -340,17 +316,13 @@ case 9:
 	} else if ( _widec > 560 ) {
 		if ( _widec > 569 ) {
 			if ( 570 <= _widec && _widec <= 639 )
-				goto tr5;
+				goto st4;
 		} else if ( _widec >= 561 )
 			goto tr12;
 	} else
-		goto tr5;
+		goto st4;
 	goto st0;
 tr17:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
 #line 19 "ngx_http_ssdb_response.rl"
 	{
         done = 1;
@@ -360,7 +332,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 364 "ngx_http_ssdb_response.c"
+#line 336 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -371,10 +343,10 @@ case 16:
 	switch( _widec ) {
 		case 266: goto st5;
 		case 269: goto st6;
-		case 522: goto tr8;
+		case 522: goto st7;
 	}
 	if ( 384 <= _widec && _widec <= 639 )
-		goto tr5;
+		goto st4;
 	goto st0;
 st10:
 	if ( ++p == pe )
@@ -383,17 +355,10 @@ case 10:
 	if ( (*p) == 10 )
 		goto st9;
 	goto st0;
-tr15:
-#line 27 "ngx_http_ssdb_response.rl"
-	{
-        ctx->chunk_read = 0;
-    }
-	goto st11;
 st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 397 "ngx_http_ssdb_response.c"
 	_widec = (*p);
 	_widec = (short)(128 + ((*p) - -128));
 	if ( 
@@ -404,10 +369,10 @@ case 11:
 	switch( _widec ) {
 		case 266: goto st9;
 		case 269: goto st6;
-		case 522: goto tr8;
+		case 522: goto st7;
 	}
 	if ( 384 <= _widec && _widec <= 639 )
-		goto tr5;
+		goto st4;
 	goto st0;
 st12:
 	if ( ++p == pe )
@@ -437,7 +402,7 @@ case 12:
 	_out: {}
 	}
 
-#line 83 "ngx_http_ssdb_response.rl"
+#line 80 "ngx_http_ssdb_response.rl"
 
 	if (!done && cs == ssdb_response_error) {
 		if(cl) {
@@ -447,7 +412,7 @@ case 12:
 		}
 		buf.data = b->pos;
 		buf.len = b->last - b->pos + bytes;
-		ngx_log_error(NGX_LOG_WARN, ctx->request->connection->log,
+		ngx_log_error(NGX_LOG_ERR, ctx->request->connection->log,
 										0, "ssdb server returned extra bytes: \"%V\" (len %z)",
 										&buf, buf.len);
 		u->length = 0;
@@ -493,6 +458,9 @@ case 12:
 			u->length = 0;
 			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		} else {
+#if defined(nginx_version) && nginx_version >= 1001004
+            u->keepalive = 1;
+#endif
 		}
 		u->length = 0;
 		return NGX_OK;

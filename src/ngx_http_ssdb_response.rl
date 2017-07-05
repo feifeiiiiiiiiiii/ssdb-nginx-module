@@ -22,9 +22,6 @@
 
     action start_reading_chunk_size {
         ctx->chunk_length = 0;
-    }
-
-    action start_reading_chunk_data {
         ctx->chunk_read = 0;
     }
 
@@ -38,7 +35,7 @@
     }
 
     chunk_length = ([1-9] digit*) >start_reading_chunk_size $read_size;
-    chunk_data_octet = any >start_reading_chunk_data when test_len;
+    chunk_data_octet = any when test_len;
     chunk_data = chunk_data_octet+;
 
     main := (chunk_length (LF|CRLF) chunk_data (LF|CRLF))+ LF @finalize
@@ -89,7 +86,7 @@ ngx_http_ssdb_process_reply(ngx_http_ssdb_ctx_t *ctx, ssize_t bytes)
 		}
 		buf.data = b->pos;
 		buf.len = b->last - b->pos + bytes;
-		ngx_log_error(NGX_LOG_WARN, ctx->request->connection->log,
+		ngx_log_error(NGX_LOG_ERR, ctx->request->connection->log,
 										0, "ssdb server returned extra bytes: \"%V\" (len %z)",
 										&buf, buf.len);
 		u->length = 0;
@@ -135,6 +132,9 @@ ngx_http_ssdb_process_reply(ngx_http_ssdb_ctx_t *ctx, ssize_t bytes)
 			u->length = 0;
 			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		} else {
+#if defined(nginx_version) && nginx_version >= 1001004
+            u->keepalive = 1;
+#endif
 		}
 		u->length = 0;
 		return NGX_OK;
