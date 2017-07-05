@@ -89,6 +89,9 @@ ngx_http_ssdb_process_reply(ngx_http_ssdb_ctx_t *ctx, ssize_t bytes)
 		}
 		buf.data = b->pos;
 		buf.len = b->last - b->pos + bytes;
+		ngx_log_error(NGX_LOG_WARN, ctx->request->connection->log,
+										0, "ssdb server returned extra bytes: \"%V\" (len %z)",
+										&buf, buf.len);
 		u->length = 0;
 		return NGX_HTTP_INTERNAL_SERVER_ERROR;
 	}

@@ -78,23 +78,32 @@ ngx_http_ssdb_handler(ngx_http_request_t *r)
 static ngx_int_t
 ngx_http_ssdb_create_request(ngx_http_request_t *r)
 {
-    ngx_http_ssdb_loc_conf_t *rlcf;
+		ngx_http_ssdb_loc_conf_t *rlcf;
     ngx_buf_t                *b;
     ngx_chain_t              *cl;
+		ngx_str_t									query;
 
-    ngx_str_t str = ngx_string("3\nget\n3\nabc\n\n");
+		rlcf = ngx_http_get_module_loc_conf(r, ngx_http_ssdb_module);
 
-    rlcf = ngx_http_get_module_loc_conf(r, ngx_http_ssdb_module);
 
-    b = ngx_create_temp_buf(r->pool, str.len);
+		if (ngx_http_complex_value(r, rlcf->complex_query, &query) != NGX_OK) {
+				return NGX_ERROR;
+		}
+		
+		ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0, "aaaaaaaaaaaa %V", query);
+
+		if (query.len == 0) {
+				return NGX_ERROR;
+		}
+
+		
+    b = ngx_create_temp_buf(r->pool, query.len);
     if(b == NULL) {
         return NGX_ERROR;
     }
 
-    if(rlcf->queries) {}
-
-    b->pos = str.data;
-    b->last = b->pos + str.len;
+    b->pos = query.data;
+    b->last = b->pos + query.len;
     b->memory = 1;
 
     cl = ngx_alloc_chain_link(r->pool);

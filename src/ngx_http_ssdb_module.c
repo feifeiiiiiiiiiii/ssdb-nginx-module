@@ -184,6 +184,31 @@ ngx_http_ssdb_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 static char *
 ngx_http_ssdb_query(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
+	
+	ngx_http_ssdb_loc_conf_t *rlcf = conf;
+	ngx_str_t 							 *value;
+
+	ngx_http_compile_complex_value_t ccv;
+
+	value = cf->args->elts;
+
+	rlcf->complex_query = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
+	
+	if (rlcf->complex_query == NULL) {
+		return NGX_CONF_ERROR;
+	}
+
+	ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
+
+	ccv.cf = cf;
+	ccv.value = &value[1];
+	ccv.complex_value = rlcf->complex_query;
+
+	if(ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+		return NGX_CONF_ERROR;
+	}
+
+
 	return NGX_CONF_OK;
 }
 

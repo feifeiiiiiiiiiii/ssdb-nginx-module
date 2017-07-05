@@ -24,7 +24,7 @@ struct ngx_http_ssdb_ctx_s {
 
 typedef struct {
     ngx_http_upstream_conf_t upstream;
-    ngx_array_t             *queries;
+		ngx_http_complex_value_t *complex_query;
 } ngx_http_ssdb_loc_conf_t;
 
 extern ngx_module_t  ngx_http_ssdb_module;
