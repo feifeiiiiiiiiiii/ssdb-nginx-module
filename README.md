@@ -1,2 +1,2 @@
 # ssdb-nginx-module
-Nginx upstream module for the SSDB protocol
+Nginx upstream module for the [ideawu's](https://github.com/ideawu) [SSDB](https://github.com/ideawu/ssdb) protocol, read more please go to [agentzh's](https://github.com/agentzh) [redis2-nginx-module](https://github.com/openresty/redis2-nginx-module), [ssdb-nginx-module](https://github.com/feifeiiiiiiiiiii/ssdb-nginx-module) just only a toy, just for study [ragel](http://www.colm.net/open-source/ragel/) state machine compiler and nginx's develpment upstream 
