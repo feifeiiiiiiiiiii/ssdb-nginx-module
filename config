@@ -2,7 +2,6 @@ ngx_addon_name=ngx_http_ssdb_module
 
 SSDB_SRCS="                                                                 \
         $ngx_addon_dir/src/ngx_http_ssdb_module.c                           \
-        $ngx_addon_dir/src/ngx_http_ssdb_request.c                          \
         $ngx_addon_dir/src/ngx_http_ssdb_response.c                         \
         $ngx_addon_dir/src/ngx_http_ssdb_handler.c                          \
         "
@@ -10,7 +9,6 @@ SSDB_SRCS="                                                                 \
 SSDB_DEPS="                                                                 \
         $ngx_addon_dir/src/ddebug.h                                         \
         $ngx_addon_dir/src/ngx_http_ssdb_module.h                           \
-        $ngx_addon_dir/src/ngx_http_ssdb_request.h                          \
         $ngx_addon_dir/src/ngx_http_ssdb_response.h                         \
         $ngx_addon_dir/src/ngx_http_ssdb_handler.h                          \
         "
