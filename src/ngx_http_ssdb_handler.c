@@ -81,30 +81,17 @@ ngx_http_ssdb_create_request(ngx_http_request_t *r)
 		ngx_http_ssdb_loc_conf_t *rlcf;
     ngx_buf_t                *b;
     ngx_chain_t              *cl;
-		ngx_str_t									query;
 
-		rlcf = ngx_http_get_module_loc_conf(r, ngx_http_ssdb_module);
-
-
-		if (ngx_http_complex_value(r, rlcf->complex_query, &query) != NGX_OK) {
-				return NGX_ERROR;
-		}
+	rlcf = ngx_http_get_module_loc_conf(r, ngx_http_ssdb_module);
 		
-		ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0, "aaaaaaaaaaaa %V", query);
+	b = ngx_calloc_buf(r->pool);
+	if (b == NULL) {
+		return NGX_ERROR;
+	}
 
-		if (query.len == 0) {
-				return NGX_ERROR;
-		}
-
-		
-    b = ngx_create_temp_buf(r->pool, query.len);
-    if(b == NULL) {
-        return NGX_ERROR;
-    }
-
-    b->pos = query.data;
-    b->last = b->pos + query.len;
-    b->memory = 1;
+	b->pos = rlcf->literal_query.data;
+	b->last = b->pos + rlcf->literal_query.len;
+	b->memory = 1;
 
     cl = ngx_alloc_chain_link(r->pool);
     if(cl == NULL) {
@@ -112,6 +99,10 @@ ngx_http_ssdb_create_request(ngx_http_request_t *r)
     }
     cl->buf = b;
     cl->next = NULL;
+
+  	ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "http redis2 request: \"%V\"", &rlcf->literal_query);
+
     r->upstream->request_bufs = cl;
     return NGX_OK;
 }

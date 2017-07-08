@@ -18,8 +18,6 @@
 static void *ngx_http_ssdb_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_ssdb_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static char *ngx_http_ssdb_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static char *ngx_http_ssdb_query(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-
 
 static ngx_command_t ngx_http_ssdb_commands[] = {
     { ngx_string("ssdb_pass"),
@@ -29,10 +27,10 @@ static ngx_command_t ngx_http_ssdb_commands[] = {
       0,
       NULL },
     { ngx_string("ssdb_query"),
-      NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
-      ngx_http_ssdb_query,
+      NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
-      0,
+      offsetof(ngx_http_ssdb_loc_conf_t, literal_query),
       NULL },
 
     ngx_null_command
@@ -77,28 +75,40 @@ ngx_http_ssdb_create_loc_conf(ngx_conf_t *cf)
 		return NULL;
 	}
 
-	conf->upstream.local = NGX_CONF_UNSET_PTR;
-	conf->upstream.next_upstream_tries = NGX_CONF_UNSET_UINT;
-	conf->upstream.connect_timeout = NGX_CONF_UNSET_MSEC;
-	conf->upstream.send_timeout = NGX_CONF_UNSET_MSEC;
-	conf->upstream.read_timeout = NGX_CONF_UNSET_MSEC;
-	conf->upstream.next_upstream_timeout = NGX_CONF_UNSET_MSEC;
+ 	/*
+     * set by ngx_pcalloc():
+     *
+     *     conf->upstream.bufs.num = 0;
+     *     conf->upstream.next_upstream = 0;
+     *     conf->upstream.temp_path = NULL;
+     *     conf->upstream.uri = { 0, NULL };
+     *     conf->upstream.location = NULL;
+     */
 
-	conf->upstream.buffer_size = NGX_CONF_UNSET_SIZE;
+    conf->upstream.local = NGX_CONF_UNSET_PTR;
+    conf->upstream.next_upstream_tries = NGX_CONF_UNSET_UINT;
+    conf->upstream.connect_timeout = NGX_CONF_UNSET_MSEC;
+    conf->upstream.send_timeout = NGX_CONF_UNSET_MSEC;
+    conf->upstream.read_timeout = NGX_CONF_UNSET_MSEC;
+    conf->upstream.next_upstream_timeout = NGX_CONF_UNSET_MSEC;
 
-	/* the hardcoded values */
-	conf->upstream.cyclic_temp_file = 0;
-	conf->upstream.buffering = 0;
-	conf->upstream.ignore_client_abort = 0;
-	conf->upstream.send_lowat = 0;
-	conf->upstream.bufs.num = 0;
-	conf->upstream.busy_buffers_size = 0;
-	conf->upstream.max_temp_file_size = 0;
-	conf->upstream.temp_file_write_size = 0;
-	conf->upstream.intercept_errors = 1;
-	conf->upstream.intercept_404 = 1;
-	conf->upstream.pass_request_headers = 0;
-	conf->upstream.pass_request_body = 0;
+    conf->upstream.buffer_size = NGX_CONF_UNSET_SIZE;
+
+    /* the hardcoded values */
+    conf->upstream.cyclic_temp_file = 0;
+    conf->upstream.buffering = 0;
+    conf->upstream.ignore_client_abort = 0;
+    conf->upstream.send_lowat = 0;
+    conf->upstream.bufs.num = 0;
+    conf->upstream.busy_buffers_size = 0;
+    conf->upstream.max_temp_file_size = 0;
+    conf->upstream.temp_file_write_size = 0;
+    conf->upstream.intercept_errors = 1;
+    conf->upstream.intercept_404 = 1;
+    conf->upstream.pass_request_headers = 0;
+    conf->upstream.pass_request_body = 0;
+    conf->upstream.force_ranges = 1;
+
 	return conf;
 }
 
@@ -180,35 +190,3 @@ ngx_http_ssdb_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 	return NGX_CONF_OK;
 }
-
-static char *
-ngx_http_ssdb_query(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
-{
-	
-	ngx_http_ssdb_loc_conf_t *rlcf = conf;
-	ngx_str_t 							 *value;
-
-	ngx_http_compile_complex_value_t ccv;
-
-	value = cf->args->elts;
-
-	rlcf->complex_query = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
-	
-	if (rlcf->complex_query == NULL) {
-		return NGX_CONF_ERROR;
-	}
-
-	ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
-
-	ccv.cf = cf;
-	ccv.value = &value[1];
-	ccv.complex_value = rlcf->complex_query;
-
-	if(ngx_http_compile_complex_value(&ccv) != NGX_OK) {
-		return NGX_CONF_ERROR;
-	}
-
-
-	return NGX_CONF_OK;
-}
-
