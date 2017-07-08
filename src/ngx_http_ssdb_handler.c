@@ -78,20 +78,50 @@ ngx_http_ssdb_handler(ngx_http_request_t *r)
 static ngx_int_t
 ngx_http_ssdb_create_request(ngx_http_request_t *r)
 {
-		ngx_http_ssdb_loc_conf_t *rlcf;
+	ngx_http_ssdb_loc_conf_t *rlcf;
     ngx_buf_t                *b;
     ngx_chain_t              *cl;
+	ngx_str_t                 query;
+
 
 	rlcf = ngx_http_get_module_loc_conf(r, ngx_http_ssdb_module);
-		
-	b = ngx_calloc_buf(r->pool);
-	if (b == NULL) {
-		return NGX_ERROR;
-	}
 
-	b->pos = rlcf->literal_query.data;
-	b->last = b->pos + rlcf->literal_query.len;
-	b->memory = 1;
+	if (rlcf->literal_query.len == 0) {
+        if (rlcf->complex_query == NULL) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                    "no ssdb query specified or the query is empty");
+
+            return NGX_ERROR;
+        }
+
+        if (ngx_http_complex_value(r, rlcf->complex_query, &query)
+                != NGX_OK)
+        {
+            return NGX_ERROR;
+        }
+
+        if (query.len == 0) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                    "the redis query is empty");
+
+            return NGX_ERROR;
+        }
+        b = ngx_create_temp_buf(r->pool, query.len);
+        if (b == NULL) {
+            return NGX_ERROR;
+        }
+        b->last = ngx_copy(b->pos, query.data, query.len);
+    } else {
+		
+		b = ngx_calloc_buf(r->pool);
+		if (b == NULL) {
+			return NGX_ERROR;
+		}
+
+		b->pos = rlcf->literal_query.data;
+		b->last = b->pos + rlcf->literal_query.len;
+		b->memory = 1;
+	}
 
     cl = ngx_alloc_chain_link(r->pool);
     if(cl == NULL) {

@@ -18,6 +18,8 @@
 static void *ngx_http_ssdb_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_ssdb_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static char *ngx_http_ssdb_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_ssdb_set_complex_value_slot(ngx_conf_t *cf, ngx_command_t *cmd,
+    void *conf);
 
 static ngx_command_t ngx_http_ssdb_commands[] = {
     { ngx_string("ssdb_pass"),
@@ -26,11 +28,17 @@ static ngx_command_t ngx_http_ssdb_commands[] = {
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
-    { ngx_string("ssdb_query"),
+    { ngx_string("ssdb_literal_query"),
       NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_ssdb_loc_conf_t, literal_query),
+      NULL },
+	{ ngx_string("ssdb_raw_query"),
+      NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
+      ngx_http_ssdb_set_complex_value_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_ssdb_loc_conf_t, complex_query),
       NULL },
 
     ngx_null_command
@@ -189,4 +197,44 @@ ngx_http_ssdb_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 	}
 
 	return NGX_CONF_OK;
+}
+
+static char *
+ngx_http_ssdb_set_complex_value_slot(ngx_conf_t *cf, ngx_command_t *cmd,
+    void *conf)
+{
+    char                             *p = conf;
+    ngx_http_complex_value_t        **field;
+    ngx_str_t                        *value;
+    ngx_http_compile_complex_value_t  ccv;
+
+    field = (ngx_http_complex_value_t **) (p + cmd->offset);
+
+    if (*field) {
+        return "is duplicate";
+    }
+
+    *field = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
+    if (*field == NULL) {
+        return NGX_CONF_ERROR;
+    }
+
+    value = cf->args->elts;
+
+    if (value[1].len == 0) {
+        ngx_memzero(*field, sizeof(ngx_http_complex_value_t));
+        return NGX_OK;
+    }
+
+    ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
+
+    ccv.cf = cf;
+    ccv.value = &value[1];
+    ccv.complex_value = *field;
+
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
+
+    return NGX_CONF_OK;
 }
